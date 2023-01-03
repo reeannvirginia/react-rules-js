@@ -1,0 +1,63 @@
+load("@aspect_rules_webpack//webpack:defs.bzl", "webpack_bundle", "webpack_devserver")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+npm_link_all_packages(name = "node_modules")
+
+
+RUNTIME_DEPS = [
+    ":node_modules/react",
+    ":node_modules/react-dom",
+    ":node_modules/babel-loader",
+    ":node_modules/html-webpack-plugin",
+    ":node_modules/@babel/preset-env",
+    ":node_modules/@babel/preset-react",
+    ":node_modules/@babel/preset-typescript",
+    ":node_modules/@babel/runtime",
+    ":node_modules/css-loader",
+    ":node_modules/style-loader",
+    ":node_modules/file-loader",
+    ":node_modules/web-vitals",
+    ":node_modules/mini-css-extract-plugin",
+]
+
+filegroup(
+    name = "srcs",
+    srcs = glob(
+        include = [
+            "src/**/*",
+        ],
+        exclude = [
+            "**/*.spec.js",
+            "node_modules/**/*",
+        ],
+    ),
+)
+
+filegroup(
+    name = "public",
+    srcs = glob(
+        include = [
+            "public/**/*",
+        ],
+    ),
+)
+
+webpack_devserver(
+    name = "start",
+    webpack_config = ":webpack.config.js",
+    data = RUNTIME_DEPS + [
+      ":srcs",
+      ":public",
+    ],
+)
+
+webpack_bundle(
+    name = "bundle",
+    output_dir = True,
+    webpack_config = ":webpack.config.js",
+    entry_point = ":src/index.jsx",
+    srcs = RUNTIME_DEPS + [
+      ":srcs",
+      ":public",
+    ],
+)
